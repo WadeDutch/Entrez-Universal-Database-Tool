@@ -1,12 +1,8 @@
 import requests
 import json
+from globals import endl, eURL, searchURL, summaryURL, fetchURL
 
-eURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
-searchURL = "esearch.fcgi"
-summaryURL = "esummary.fcgi"
-fetchURL = "efetch.fcgi"
 dblist = json.loads(requests.get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi", params={"retmode":"json"}).text)["einforesult"]["dblist"]
-endl = "\n"
 
 #responseJSON = dumps(bf.data(fromstring(r.text)))
 def getdblist():
