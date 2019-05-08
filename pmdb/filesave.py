@@ -1,6 +1,6 @@
 import csv
+from globals import endl
 
-endl = "\n"
 def saveas(fname, data):
     if fname == "":
         return

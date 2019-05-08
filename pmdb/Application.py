@@ -5,13 +5,8 @@ import config as cfg
 import webbrowser
 import filesave
 from tkinter import filedialog
+from globals import endl, sortoptions
 
-sortoptions = {
-"Default",
-"Newest",
-"Oldest"
-}
-endl = "\n"
 class Application(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
@@ -91,7 +86,6 @@ class Application(tk.Frame):
     def displayresults(self, results):
         self.resultbox.config(state=tk.NORMAL)
         self.resultbox.delete(1.0, "end")
-        outList = []
         for id in results["uids"]:
             for dsp in self.displayorder:
                 if (getattr(self, dsp).get()):
