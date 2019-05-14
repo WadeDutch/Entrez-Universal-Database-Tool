@@ -15,7 +15,7 @@ class Application(tk.Frame):
 
         #runtime settings vars
         self.lastsearch = ""
-        self.searchindex = 0
+        self.searchindex = 1
         self.searchsettingsopen = False
         #ini settings vars
         self.initsettings()
@@ -54,20 +54,37 @@ class Application(tk.Frame):
         self.master.config(menu=menubar)
 
     def create_searchbar(self):
-        tk.Label(self, text="Search").grid(row=1, column=1, sticky="e")
+        #Search entry
+        tk.Label(self, text="Search").grid(row=1, column=1, sticky="w")
         self.searchEntry = tk.Entry(self)
         self.searchEntry.grid(row=1, column=2, sticky="w")
         self.searchEntry.bind("<Return>", lambda e: self.search())
 
-        tk.Label(self, text="Database").grid(row=2, column=1, sticky="e")
+        #database entry
+        tk.Label(self, text="Database").grid(row=2, column=1, sticky="w")
         self.dbEntry = tk.OptionMenu(self, self.database, *api.getdblist())
-        self.dbEntry.grid(row=2, column=2, sticky="w")
+        self.dbEntry.grid(row=2, column=2, sticky="ew")
 
+        #sort entry
+        '''
         tk.Label(self, text="Sort By").grid(row=2, column=3)
         self.sort = tk.StringVar(self)
         self.sort.set("Default")
         self.sortmenu = tk.OptionMenu(self, self.sort, *sortoptions)
-        self.sortmenu.grid(row=2, column = 4, sticky="w")
+        self.sortmenu.grid(row=2, column = 4, sticky="e")
+        '''
+
+        #Page index
+        self.indexLabel = tk.StringVar()
+        self.indexLabel.set("Showing " + str(self.searchindex) + "-" + str(self.searchindex+self.maxresults.get()-1) + " of 0")
+        tk.Label(self.master, textvariable=self.indexLabel).pack()        #(row=1, column=5, sticky="e", columnspan=2)
+        self.pageRightBtn = tk.Button(self.master, text="----->")
+        self.pageLeftBtn = tk.Button(self.master, text="<-----")
+        self.pageRightBtn.bind("<ButtonRelease-1>", lambda e: self.modifyindex(self.maxresults.get()))
+        self.pageLeftBtn.bind("<ButtonRelease-1>", lambda e: self.modifyindex(-1*self.maxresults.get()))
+        self.pageRightBtn.pack(side="right", fill="x", expand=True, padx = (0,500), pady = (0,25))        #(row=2, column=6)
+        self.pageLeftBtn.pack(side = "right", fill="x", expand=True, padx = (500,0), pady = (0,25))       #(row=2, column=5)
+
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -83,10 +100,15 @@ class Application(tk.Frame):
         self.resultbox.bind("<Motion>", self.linkevent)
         self.resultbox.config(cursor="arrow")
 
-    def displayresults(self, results):
+    def displayresults(self, results, total):
+        #update search indexLabel
+        self.indexLabel.set("Showing " + str(self.searchindex) + "-" + str(self.searchindex+self.maxresults.get()-1) + " of " + str(total))
+        total = 0
         self.resultbox.config(state=tk.NORMAL)
         self.resultbox.delete(1.0, "end")
         for id in results["uids"]:
+            if total >= self.maxresults.get():
+                continue
             for dsp in self.displayorder:
                 if (getattr(self, dsp).get()):
                     if (dsp == "links"):
@@ -102,8 +124,16 @@ class Application(tk.Frame):
             #end dsp in self.displayorder
             #insert break between results
             self.resultbox.insert(tk.INSERT, "-"*20+endl)
+            total += 1
         #disable at end
         self.resultbox.config(state=tk.DISABLED)
+
+    def modifyindex(self, ammount):
+        if (self.searchindex + ammount > 1):
+            self.searchindex += ammount
+        elif (self.searchindex + ammount < 1):
+            self.searchindex = 1
+        self.search()
 
     def linkevent(self, e):
         if ("link" in self.resultbox.tag_names("@%d,%d" % (e.x, e.y))):
@@ -111,18 +141,18 @@ class Application(tk.Frame):
         else:
             self.resultbox.config(cursor="arrow")
 
-    def search(self):
+    def search(self, query=""):
+        query = self.searchEntry.get() if not (self.searchEntry.get() == "") else self.lastsearch
         try:
-            WebEnv, Key, count = api.searchdb(self.searchEntry.get(), self.database.get().lower())
+            WebEnv, Key, count = api.searchdb(query, self.database.get().lower())
         except ValueError:
-            print("Invalid Database")
             self.alert("'"+self.dbEntry.get()+"' is not recognized as a valid Entrez data base, please check spelling or try again later.")
             return None
         results = api.getsummary(WebEnv, Key, start=self.searchindex, count=self.maxresults.get())
-        self.lastsearch = self.searchEntry.get()
+        self.lastsearch = query
         self.searchEntry.delete(0, 'end')
 
-        self.displayresults(results)
+        self.displayresults(results, count)
         #return results
 
     def alert(self, msg):
