@@ -129,11 +129,11 @@ class Application(tk.Frame):
         self.resultbox.config(state=tk.DISABLED)
 
     def modifyindex(self, ammount):
-        if (self.searchindex + ammount > 1):
+        if (self.searchindex + ammount >= 1):
             self.searchindex += ammount
         elif (self.searchindex + ammount < 1):
             self.searchindex = 1
-        self.search()
+        self.search(new=False)
 
     def linkevent(self, e):
         if ("link" in self.resultbox.tag_names("@%d,%d" % (e.x, e.y))):
@@ -141,19 +141,19 @@ class Application(tk.Frame):
         else:
             self.resultbox.config(cursor="arrow")
 
-    def search(self, query=""):
-        query = self.searchEntry.get() if not (self.searchEntry.get() == "") else self.lastsearch
-        try:
-            WebEnv, Key, count = api.searchdb(query, self.database.get().lower())
-        except ValueError:
-            self.alert("'"+self.dbEntry.get()+"' is not recognized as a valid Entrez data base, please check spelling or try again later.")
-            return None
-        results = api.getsummary(WebEnv, Key, start=self.searchindex, count=self.maxresults.get())
-        self.lastsearch = query
+    def search(self, new=True):
+        if (new):
+            query = self.searchEntry.get()
+            try:
+                self.WebEnv, self.Key, self.rescount = api.searchdb(query, self.database.get().lower())
+            except ValueError:
+                self.alert("'"+self.dbEntry.get()+"' is not recognized as a valid Entrez data base, please check spelling or try again later.")
+                return None
+            self.lastsearch = query
+        results = api.getsummary(self.WebEnv, self.Key, start=self.searchindex, count=self.maxresults.get())
         self.searchEntry.delete(0, 'end')
 
-        self.displayresults(results, count)
-        #return results
+        self.displayresults(results, self.rescount)
 
     def alert(self, msg):
         popup = tk.Tk()
