@@ -151,7 +151,6 @@ class Application(tk.Frame):
                 return None
             self.lastsearch = query
         results = api.getsummary(self.WebEnv, self.Key, start=self.searchindex, count=self.maxresults.get())
-        self.searchEntry.delete(0, 'end')
 
         self.displayresults(results, self.rescount)
 
