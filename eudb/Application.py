@@ -30,7 +30,6 @@ class Application(tk.Frame):
     def initsettings(self, default=False):
         if (default):
             cfg.resetsettings()
-            print("reset called")
         settings = cfg.loadsettings()
         self.database = tk.StringVar(self, settings["database"])
         self.maxresults = tk.IntVar(self, int(settings["maxresults"]))
@@ -48,13 +47,14 @@ class Application(tk.Frame):
         settings = tk.Menu(menubar, tearoff=0)
         settings.add_command(label="Change Displayed Info", command= self.opensearchsettings)
         settings.add_command(label="Change Order", command= self.openordersettings)
+        settings.add_command(label="Reset Settings", command = lambda: self.initsettings(True))
 
         save = tk.Menu(menubar, tearoff=0)
         #save.add_command(label="Save Results to Spreadsheet", command= lambda: filesave.saveas(self.lastsearch, self.resultbox.get(1.0, tk.END)))
         save.add_command(label="Save Results As...", command= lambda: filesave.saveas(filedialog.asksaveasfilename(initialdir = "/",title = "Save File",filetypes = (("csv files","*.csv"),("all files","*.*"))), self.resultbox.get(1.0, tk.END)))
 
         menubar.add_cascade(label="File", menu=save)
-        menubar.add_cascade(label="Search Options", menu=settings)
+        menubar.add_cascade(label="Search Settings", menu=settings)
         self.master.config(menu=menubar)
 
     def create_searchbar(self):
