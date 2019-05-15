@@ -16,7 +16,7 @@ class Application(tk.Frame):
         #runtime settings vars
         self.lastsearch = ""
         self.searchindex = 1
-        self.searchsettingsopen = False
+        self.rescount = 0
         #ini settings vars
         self.initsettings()
 
@@ -129,11 +129,12 @@ class Application(tk.Frame):
         self.resultbox.config(state=tk.DISABLED)
 
     def modifyindex(self, ammount):
-        if (self.searchindex + ammount >= 1):
+        if (self.searchindex + ammount >= 1 and not self.rescount == 0):
             self.searchindex += ammount
-        elif (self.searchindex + ammount < 1):
+            self.search(new=False)
+        elif (self.searchindex + ammount < 1 and not self.searchindex == 1):
             self.searchindex = 1
-        self.search(new=False)
+            self.search(new=False)
 
     def linkevent(self, e):
         if ("link" in self.resultbox.tag_names("@%d,%d" % (e.x, e.y))):
@@ -164,6 +165,8 @@ class Application(tk.Frame):
     def opensearchsettings(self):
         self.top = tk.Toplevel()
 
+        tk.Label(self.top, text="Max Results Displayed").pack()
+        tk.Entry(self.top, textvariable = self.maxresults, justify="center").pack()
         for dsp in self.displayorder:
             if (dsp=="links"):
                 tk.Checkbutton(self.top, text="Show Links", variable= self.links).pack()
@@ -183,7 +186,7 @@ class Application(tk.Frame):
         self.top.resetBtn = tk.Button(self.top, text="Reset to Default")
         self.top.saveBtn.pack()
         self.top.resetBtn.pack()
-        self.top.saveBtn.bind("<1>", lambda e: cfg.changesettings([("links",self.links.get()),("authors",self.authors.get()),("date",self.date.get()),("source",self.source.get()),("title",self.title.get()),("journal",self.journal.get())]))
+        self.top.saveBtn.bind("<1>", lambda e: cfg.changesettings([("links",self.links.get()),("authors",self.authors.get()),("date",self.date.get()),("source",self.source.get()),("title",self.title.get()),("journal",self.journal.get()),("maxresults",self.maxresults.get())]))
         self.top.saveBtn.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
         self.top.resetBtn.bind("<1>", lambda e: self.initsettings(d=True))
         self.top.resetBtn.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
