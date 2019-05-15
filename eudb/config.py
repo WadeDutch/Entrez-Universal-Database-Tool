@@ -11,7 +11,8 @@ def resetsettings():
                             "source":"1",
                             "title":"1",
                             "journal":"1",
-                            "displayorder":"title,authors,date,source,journal,links"}
+                            "displayorder":"title,authors,date,source,journal,links",
+                            "masterdisplayorder":"title,authors,date,source,journal,links"}
     with open("settings.ini", "w+") as configfile:
         config.write(configfile)
 

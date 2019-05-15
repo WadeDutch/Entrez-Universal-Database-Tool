@@ -18,14 +18,17 @@ class Application(tk.Frame):
         self.searchindex = 1
         self.rescount = 0
         #ini settings vars
-        self.initsettings()
+        try:
+            self.initsettings()
+        except:
+            self.initsettings(True)
 
         self.create_resultsbox()
         self.create_searchbar()
         self.create_menu()
 
-    def initsettings(self, d=False):
-        if (d):
+    def initsettings(self, default=False):
+        if (default):
             cfg.resetsettings()
             print("reset called")
         settings = cfg.loadsettings()
@@ -38,6 +41,7 @@ class Application(tk.Frame):
         self.title = tk.IntVar(self, settings.getint("title"))
         self.journal = tk.IntVar(self, settings.getint("journal"))
         self.displayorder = list(settings["displayorder"].split(","))
+        self.masterdisplayorder = list(settings["masterdisplayorder"].split(","))
 
     def create_menu(self):
         menubar = tk.Menu(self.master)
@@ -188,23 +192,34 @@ class Application(tk.Frame):
         self.top.resetBtn.pack()
         self.top.saveBtn.bind("<1>", lambda e: cfg.changesettings([("links",self.links.get()),("authors",self.authors.get()),("date",self.date.get()),("source",self.source.get()),("title",self.title.get()),("journal",self.journal.get()),("maxresults",self.maxresults.get())]))
         self.top.saveBtn.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
-        self.top.resetBtn.bind("<1>", lambda e: self.initsettings(d=True))
+        self.top.resetBtn.bind("<1>", lambda e: self.initsettings(default=True))
         self.top.resetBtn.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
 
     def openordersettings(self):
         self.top = tk.Toplevel()
         self.top.comboboxes = []
         for dsp in self.displayorder:
-            self.top.comboboxes.append(ttk.Combobox(self.top, values=self.displayorder, state="readonly")) #switch to tkoption menu
+            self.top.comboboxes.append(ttk.Combobox(self.top, values=self.masterdisplayorder, state="readonly")) #switch to tkoption menu
             self.top.comboboxes[-1].pack()
             self.top.comboboxes[-1].set(dsp)
         self.top.save = tk.Button(self.top, text="Save")
         self.top.cancel = tk.Button(self.top, text="Cancel")
+        self.top.reset = tk.Button(self.top, text="Reset")
         self.top.save.pack()
         self.top.cancel.pack()
+        self.top.reset.pack()
         self.top.save.bind("<1>", lambda e: self.updateorder(self.top.comboboxes))
         self.top.save.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
         self.top.cancel.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
+        self.top.reset.bind("<1>", lambda e: self.updateorder(default=True))
+        self.top.reset.bind("<ButtonRelease-1>", lambda e: self.top.destroy())
 
-    def updateorder(self, comboboxes):
-        self.displayorder = [self.displayorder[cb.current()] for cb in comboboxes]
+
+    def updateorder(self, comboboxes="", default=False):
+        if (default):
+            self.displayorder=self.masterdisplayorder
+            cfg.changesettings([("displayorder",self.masterdisplayorder.split(","))])
+            return
+        self.displayorder = [self.masterdisplayorder[cb.current()] for cb in comboboxes]
+        comma = ","
+        cfg.changesettings([("displayorder",comma.join(self.displayorder))])
