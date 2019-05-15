@@ -216,10 +216,10 @@ class Application(tk.Frame):
 
 
     def updateorder(self, comboboxes="", default=False):
+        comma = ","
         if (default):
             self.displayorder=self.masterdisplayorder
-            cfg.changesettings([("displayorder",self.masterdisplayorder.split(","))])
+            cfg.changesettings([("displayorder",comma.join(self.masterdisplayorder))])
             return
         self.displayorder = [self.masterdisplayorder[cb.current()] for cb in comboboxes]
-        comma = ","
         cfg.changesettings([("displayorder",comma.join(self.displayorder))])
