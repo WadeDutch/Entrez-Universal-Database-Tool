@@ -19,7 +19,8 @@ def searchdb(qstring, db, sort=""):
         "term":qstring,
         "usehistory":"y",
         "retmode":"json",
-        "sort":sort
+        "sort":sort,
+        "api_key":"c8f2762d861f09c5a64ad3f8531fe6d4d008"
     }
 
     r = requests.get(eURL+searchURL, params=payload)
@@ -39,7 +40,8 @@ def getsummary(WebEnv, Key, start=0, count=20, db="pubmed"):
         "WebEnv":WebEnv,
         "retstart":start,
         "retmax":count,
-        "retmode":"json"
+        "retmode":"json",
+        "api_key":"c8f2762d861f09c5a64ad3f8531fe6d4d008"
     }
 
     r = requests.get(eURL+summaryURL, params=payload)
