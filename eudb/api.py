@@ -8,7 +8,7 @@ dblist = json.loads(requests.get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/
 def getdblist():
     return dblist
 
-def searchdb(qstring, db):
+def searchdb(qstring, db, sort=""):
     if (db not in dblist):
         raise ValueError("Invalid Database")
 
@@ -18,7 +18,8 @@ def searchdb(qstring, db):
         "db":db,
         "term":qstring,
         "usehistory":"y",
-        "retmode":"json"
+        "retmode":"json",
+        "sort":sort
     }
 
     r = requests.get(eURL+searchURL, params=payload)
@@ -79,6 +80,6 @@ def getresultline(docsum, target, database):
             except:
                 return "Title: Not Found"+endl
     #end pubmed return code
-    
+
 
     return "Nothing Found"

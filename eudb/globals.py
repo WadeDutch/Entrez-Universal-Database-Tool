@@ -4,7 +4,5 @@ searchURL = "esearch.fcgi"
 summaryURL = "esummary.fcgi"
 fetchURL = "efetch.fcgi"
 sortoptions = {
-"Default",
-"Newest",
-"Oldest"
+"pubmed":("Default",'pub date','relevance','first author','last author','title','journal')
 }

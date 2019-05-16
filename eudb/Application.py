@@ -68,15 +68,14 @@ class Application(tk.Frame):
         tk.Label(self, text="Database").grid(row=2, column=1, sticky="w")
         self.dbEntry = tk.OptionMenu(self, self.database, *api.getdblist())
         self.dbEntry.grid(row=2, column=2, sticky="ew")
+        self.database.trace("w", lambda e, f, g: self.updatesort())
 
         #sort entry
-        '''
         tk.Label(self, text="Sort By").grid(row=2, column=3)
         self.sort = tk.StringVar(self)
         self.sort.set("Default")
-        self.sortmenu = tk.OptionMenu(self, self.sort, *sortoptions)
+        self.sortmenu = tk.OptionMenu(self, self.sort, *sortoptions[self.database.get()])
         self.sortmenu.grid(row=2, column = 4, sticky="e")
-        '''
 
         #Page index
         self.indexLabel = tk.StringVar()
@@ -140,6 +139,13 @@ class Application(tk.Frame):
             self.searchindex = 1
             self.search(new=False)
 
+    def updatesort(self):
+        self.sort.set("")
+        self.sortmenu["menu"].delete(0, "end")
+
+        for option in sortoptions[self.database.get()]:
+            self.sortmenu['menu'].add_command(label=option, command=tk._setit(self.sort, option))
+
     def linkevent(self, e):
         if ("link" in self.resultbox.tag_names("@%d,%d" % (e.x, e.y))):
             self.resultbox.config(cursor="hand2")
@@ -150,7 +156,7 @@ class Application(tk.Frame):
         if (new):
             query = self.searchEntry.get()
             try:
-                self.WebEnv, self.Key, self.rescount = api.searchdb(query, self.database.get().lower())
+                self.WebEnv, self.Key, self.rescount = api.searchdb(query, self.database.get().lower(), sort=self.sort.get())
             except ValueError:
                 self.alert("'"+self.dbEntry.get()+"' is not recognized as a valid Entrez data base, please check spelling or try again later.")
                 return None
